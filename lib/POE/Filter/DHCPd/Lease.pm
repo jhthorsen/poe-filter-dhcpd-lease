@@ -18,18 +18,17 @@ use constant LEASE  => 1;
 use constant DONE   => "\a";
 
 our $VERSION = "0.01";
-our $START   = qr{^lease\s([\d\.]+)};
-our $END     = qr{^\}$};
+our $START   = qr/^ lease \s ([\d\.]+) \s \{ /mx;
+our $END     = qr/ } [\n\r]+ /mx;
 our %PARSER  = (
-    starts      => qr{^\W+starts\s\d+\s(.+)},
-    ends        => qr{^\W+ends\s\d+\s(.+)},
-    hw_ethernet => qr{^\W+hardware\sethernet\s(.+)},
-    remote_id   => qr{^\W+option\sagent.remote-id\s(.+)},
-    binding     => qr{^\W+binding\sstate\s(.+)},
-    hostname    => qr{^\W+client-hostname\s\"([^"]+)\"},
-    circuit_id  => qr{^\W+option\sagent.circuit-id\s(.+)},
+    starts      => qr/ starts  \s\d+\s (.+) /mx,
+    ends        => qr/ ends    \s\d+\s (.+) /mx,
+    binding     => qr/ binding \s state \s (.+) /mx,
+    hw_ethernet => qr/ hardware \s ethernet \s (.+) /mx,
+    remote_id   => qr/ option \s agent.remote-id  \s (.+) /mx,
+    circuit_id  => qr/ option \s agent.circuit-id \s (.+) /mx,
+    hostname    => qr/ client-hostname \s "([^"]+)" /mx,
 );
-
 
 =head1 METHODS
 
@@ -41,9 +40,7 @@ our %PARSER  = (
 
 sub new {
     my $class = shift;
-    my $self  = [ q(), undef ]; # [ BUFFER(), LEASE() ]
-
-    return $self;
+    return bless [ q(), undef ], $class;
 }
 
 =head2 get_one_start
@@ -67,9 +64,11 @@ sub get_one_start {
 
     if($self->[LEASE]) {
         for my $k (keys %PARSER) {
-            $self->[BUFFER] =~ s/$PARSER{$k}// and $self->[LEASE]{$k} = $1;
+            if($self->[BUFFER] =~ s/\s*$PARSER{$k};[\n\r]*//) {
+                $self->[LEASE]{$k} = $1;
+            }
         }
-        if($self->[BUFFER] =~ /$END/) {
+        if($self->[BUFFER] =~ s/.*$END//s) {
             $self->[LEASE]{DONE()} = 1;
         }
     }
@@ -132,7 +131,14 @@ sub get_pending {
 
 =head1 AUTHOR
 
-Jan Henning Thorsen << jhthorsen-at-cpan-org >>
+Jan Henning Thorsen, C<< <jhthorsen-at-cpan-org> >>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2007 Jan Henning Thorsen, all rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
 
