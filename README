@@ -2,7 +2,7 @@ NAME
     POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 VERSION
-    0.01
+    0.02
 
 METHODS
   new
@@ -19,10 +19,10 @@ METHODS
 
     $leases is an array-ref, containing zero or one leases.
 
-     starts      => start data of lease
-     ends        => the lease expire data
-     binding     => either "active" or "free"
-     hw_ethernet => ethernet address
+     starts      => DateTime object
+     ends        => DateTime object
+     binding     => "active" or "free"
+     hw_ethernet => the client ethernet address
      hostname    => the client hostname
      circuit_id  => circuit id from relay agent (option 82)
      remote_id   => remote id from relay agent (option 82)

@@ -68,10 +68,10 @@ sub get_one_start {
 
 C<$leases> is an array-ref, containing zero or one leases.
 
- starts      => start data of lease (epoch)
- ends        => the lease expire data (epoch)
- binding     => either "active" or "free"
- hw_ethernet => ethernet address
+ starts      => DateTime object
+ ends        => DateTime object
+ binding     => "active" or "free"
+ hw_ethernet => the client ethernet address
  hostname    => the client hostname
  circuit_id  => circuit id from relay agent (option 82)
  remote_id   => remote id from relay agent (option 82)
@@ -108,23 +108,16 @@ sub get_one {
 
         return [ $lease ];
     }
-    else {
-        return [];
-    }
+
+    return [];
 }
 
 sub _parse_date {
     local $_ = shift or return;
+    my @keys = qw/year month day hour minute second/;
 
-    if(m" (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) "x) {
-        return DateTime->new(
-                   year   => $1,
-                   month  => $2,
-                   day    => $3,
-                   hour   => $4,
-                   minute => $5,
-                   second => $6,
-               );
+    if(my @date = m" (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) "x) {
+        return DateTime->new(map { $_ => shift @date } @keys);
     }
     else {
         return $_;
