@@ -58,21 +58,6 @@ sub get_one_start {
 
     $self->[BUFFER] .= join "", @$data;
 
-    if(!defined $self->[LEASE] and $self->[BUFFER] =~ s/$START//) {
-        $self->[LEASE] = { ip => $1 };
-    }
-
-    if($self->[LEASE]) {
-        for my $k (keys %PARSER) {
-            if($self->[BUFFER] =~ s/\s*$PARSER{$k};[\n\r]*//) {
-                $self->[LEASE]{$k} = $1;
-            }
-        }
-        if($self->[BUFFER] =~ s/.*$END//s) {
-            $self->[LEASE]{DONE()} = 1;
-        }
-    }
-
     return;
 }
 
@@ -95,12 +80,29 @@ C<$leases> is an array-ref, containing zero or one leases.
 sub get_one {
     my $self = shift;
 
-    if($self->[LEASE] and $self->[LEASE]{DONE()}) {
-        delete $self->[LEASE]{DONE()};
-        return [ delete $self->[LEASE] ];
+    if(!$self->[LEASE]) {
+        if($self->[BUFFER] =~ s/$START//) {
+            $self->[LEASE] = { ip => $1 };
+        }
     }
 
-    return [];
+    if($self->[LEASE]) {
+        for my $k (keys %PARSER) {
+            if($self->[BUFFER] =~ s/\s*$PARSER{$k};[\n\r]*//) {
+                $self->[LEASE]{$k} = $1;
+            }
+        }
+        if($self->[BUFFER] =~ s/.*?$END//s) {
+            $self->[LEASE]{DONE()} = 1;
+        }
+    }
+
+    if($self->[LEASE] and $self->[LEASE]{DONE()}) {
+        return [ delete $self->[LEASE] ];
+    }
+    else {
+        return [];
+    }
 }
 
 =head2 get

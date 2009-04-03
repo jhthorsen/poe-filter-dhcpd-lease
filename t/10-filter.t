@@ -3,34 +3,47 @@
 use strict;
 use warnings;
 use POE::Filter::DHCPd::Lease;
-use Test::More tests => 8;
+use Test::More tests => 18;
 
-my $filter = POE::Filter::DHCPd::Lease->new;
-my $ctrl   = 100;
+my $filter  = POE::Filter::DHCPd::Lease->new;
+my $datapos = 1 + tell DATA;
 my $buffer;
 
-while($ctrl--) {
-    unless(defined read(DATA, $buffer, 16)) {
-        die $!;
-    }
-    unless(length $buffer) {
-        last;
+for my $bufsize (16, 2048) {
+    my $ctrl = 100;
+
+    seek DATA, $datapos, 0;
+
+    ok($bufsize, "> reading with bufsize $bufsize");
+
+    while($ctrl--) {
+        unless(defined read(DATA, $buffer, $bufsize)) {
+            skip("read failed: $!", 3);
+        }
+        unless(length $buffer) {
+            last;
+        }
+
+        $filter->get_one_start([$buffer]);
+
+        while(1) {
+            my $leases = $filter->get_one;
+
+            last unless(@$leases);
+
+            for my $lease (@$leases) {
+                ok($lease->{'ip'}, "got lease for $lease->{'ip'}");
+                is($lease->{'binding'}, 'free', "lease got free binding");
+                is(length($lease->{'hw_ethernet'}), 17,
+                    "lease for hw_ethernet: $lease->{'hw_ethernet'}"
+                );
+            }
+        }
     }
 
-    $filter->get_one_start([$buffer]);
-    my $lease = $filter->get_one;
-
-    if(@$lease) {
-        ok($lease->[0]{'ip'}, "got lease for $lease->[0]{'ip'}");
-        is($lease->[0]{'binding'}, 'free', "lease got free binding");
-        is(length($lease->[0]{'hw_ethernet'}), 17,
-            "lease for hw_ethernet: $lease->[0]{'hw_ethernet'}"
-        );
-    }
+    ok($ctrl, "control loop ended before being self destroyed");
+    is($filter->get_pending, q(), "no more data in buffer");
 }
-
-ok($ctrl, "control loop ended before being self destroyed");
-is($filter->get_pending, q(), "no more data in buffer");
 
 __DATA__
 
