@@ -6,18 +6,19 @@ POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 =head1 VERSION
 
-0.01
+0.02
 
 =cut
 
 use strict;
 use warnings;
 use base qw/POE::Filter/;
+use DateTime;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
 use constant DONE   => "\a";
 
-our $VERSION = "0.01";
+our $VERSION = "0.02";
 our $START   = qr/^ lease \s ([\d\.]+) \s \{ /mx;
 our $END     = qr/ } [\n\r]+ /mx;
 our %PARSER  = (
@@ -67,8 +68,8 @@ sub get_one_start {
 
 C<$leases> is an array-ref, containing zero or one leases.
 
- starts      => start data of lease
- ends        => the lease expire data
+ starts      => start data of lease (epoch)
+ ends        => the lease expire data (epoch)
  binding     => either "active" or "free"
  hw_ethernet => ethernet address
  hostname    => the client hostname
@@ -98,10 +99,35 @@ sub get_one {
     }
 
     if($self->[LEASE] and $self->[LEASE]{DONE()}) {
-        return [ delete $self->[LEASE] ];
+        my $lease = delete $self->[LEASE];
+
+        for my $k (qw/starts ends/) {
+            next unless($lease->{$k});
+            $lease->{$k} = _parse_date($lease->{$k});
+        }
+
+        return [ $lease ];
     }
     else {
         return [];
+    }
+}
+
+sub _parse_date {
+    local $_ = shift or return;
+
+    if(m" (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) "x) {
+        return DateTime->new(
+                   year   => $1,
+                   month  => $2,
+                   day    => $3,
+                   hour   => $4,
+                   minute => $5,
+                   second => $6,
+               );
+    }
+    else {
+        return $_;
     }
 }
 

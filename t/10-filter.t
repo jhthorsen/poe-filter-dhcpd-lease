@@ -11,6 +11,7 @@ my $buffer;
 
 for my $bufsize (16, 2048) {
     my $ctrl = 100;
+    my @ends = qw(2008-07-14 2008-08-16);
 
     seek DATA, $datapos, 0;
 
@@ -32,8 +33,9 @@ for my $bufsize (16, 2048) {
             last unless(@$leases);
 
             for my $lease (@$leases) {
+                my $ends = shift @ends;
                 ok($lease->{'ip'}, "got lease for $lease->{'ip'}");
-                is($lease->{'binding'}, 'free', "lease got free binding");
+                is($lease->{'ends'}->ymd, $ends, "ends at $ends");
                 is(length($lease->{'hw_ethernet'}), 17,
                     "lease for hw_ethernet: $lease->{'hw_ethernet'}"
                 );
