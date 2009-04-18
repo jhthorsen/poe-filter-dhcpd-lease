@@ -13,14 +13,15 @@ POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 use strict;
 use warnings;
 use base qw/POE::Filter/;
-use DateTime;
+use Time::Local;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
 use constant DONE   => "\a";
 
 our $VERSION = "0.02";
-our $START   = qr/^ lease \s ([\d\.]+) \s \{ /mx;
-our $END     = qr/ } [\n\r]+ /mx;
+our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
+our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
+our $END     = qr# } [\n\r]+ #mx;
 our %PARSER  = (
     starts      => qr/ starts  \s\d+\s (.+) /mx,
     ends        => qr/ ends    \s\d+\s (.+) /mx,
@@ -68,10 +69,10 @@ sub get_one_start {
 
 C<$leases> is an array-ref, containing zero or one leases.
 
- starts      => DateTime object
- ends        => DateTime object
+ starts      => epoch value
+ ends        => epoch value
  binding     => "active" or "free"
- hw_ethernet => the client ethernet address
+ hw_ethernet => 12 chars, without ":"
  hostname    => the client hostname
  circuit_id  => circuit id from relay agent (option 82)
  remote_id   => remote id from relay agent (option 82)
@@ -99,11 +100,18 @@ sub get_one {
     }
 
     if($self->[LEASE] and $self->[LEASE]{DONE()}) {
+        delete $self->[LEASE]{DONE()};
         my $lease = delete $self->[LEASE];
 
         for my $k (qw/starts ends/) {
             next unless($lease->{$k});
-            $lease->{$k} = _parse_date($lease->{$k});
+            if(my @values = $lease->{$k} =~ $DATE) {
+                $lease->{$k} = timelocal(reverse @values);
+            }
+        }
+
+        if(my $mac =  _mac($lease->{'hw_ethernet'})) {
+            $lease->{'hw_ethernet'} = $mac;
         }
 
         return [ $lease ];
@@ -112,16 +120,13 @@ sub get_one {
     return [];
 }
 
-sub _parse_date {
-    local $_ = shift or return;
-    my @keys = qw/year month day hour minute second/;
+sub _mac {
+    my $str = shift or return;
 
-    if(my @date = m" (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) "x) {
-        return DateTime->new(map { $_ => shift @date } @keys);
-    }
-    else {
-        return $_;
-    }
+    $str =  join "", map { sprintf "%02s", $_ } split /:/, $str;
+    $str =~ tr/[0-9a-fA-F]//cd;
+
+    return length $str == 12 ? lc($str) : undef;
 }
 
 =head2 get
