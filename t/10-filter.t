@@ -11,7 +11,8 @@ my $buffer;
 
 for my $bufsize (16, 2048) {
     my $ctrl = 100;
-    my @ends = qw(2008-07-14 2008-08-16);
+    my @ends = (1218735752, 1221536691);
+    my @macs = qw/001133556611 aaff33552211/;
 
     seek DATA, $datapos, 0;
 
@@ -34,11 +35,10 @@ for my $bufsize (16, 2048) {
 
             for my $lease (@$leases) {
                 my $ends = shift @ends;
+                my $mac  = shift @macs;
                 ok($lease->{'ip'}, "got lease for $lease->{'ip'}");
-                is($lease->{'ends'}->ymd, $ends, "ends at $ends");
-                is(length($lease->{'hw_ethernet'}), 17,
-                    "lease for hw_ethernet: $lease->{'hw_ethernet'}"
-                );
+                is($lease->{'hw_ethernet'}, $mac, "got lease for $mac");
+                is($lease->{'ends'}, $ends, "ends $ends");
             }
         }
     }
@@ -62,6 +62,6 @@ lease 10.19.83.198 {
   ends 6 2008/08/16 05:44:51;
   tstp 6 2008/08/16 05:44:51;
   binding state free;
-  hardware ethernet aa:ff:33:55:22:11;
+  hardware ethernet AA:ff:33:55:22:11;
 }
 

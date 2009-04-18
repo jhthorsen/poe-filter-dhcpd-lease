@@ -1,9 +1,10 @@
 Revision history for Perl module POE::Component::TFTPd
 
+0.02 Fri Apr  3 11:11:40 2009
+   - starts/ends are in epoch format
+   - fixed greedy bug
+   - code seems to actually do something
+
 0.01 Thu Apr  2 00:15:30 2009
    - Commited first version of POE::Filter::DHCPd::Lease
-
-0.02 Fri Apr  3 11:11:40 2009
-   - starts/ends are DateTime objects
-   - fixed greedy bug
 
