@@ -105,8 +105,9 @@ sub get_one {
 
         for my $k (qw/starts ends/) {
             next unless($lease->{$k});
-            if(my @values = $lease->{$k} =~ $DATE) {
-                $lease->{$k} = timelocal(reverse @values);
+            if(my @values = reverse $lease->{$k} =~ $DATE) {
+                $values[4]--;
+                $lease->{$k} = timelocal(@values);
             }
         }
 

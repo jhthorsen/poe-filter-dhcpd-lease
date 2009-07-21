@@ -2,8 +2,9 @@
 
 use strict;
 use warnings;
+use lib './lib';
 use POE::Filter::DHCPd::Lease;
-use Test::More tests => 18;
+use Test::More tests => 16;
 
 my $filter  = POE::Filter::DHCPd::Lease->new;
 my $datapos = 1 + tell DATA;
@@ -11,12 +12,12 @@ my $buffer;
 
 for my $bufsize (16, 2048) {
     my $ctrl = 100;
-    my @ends = (1218735752, 1221536691);
+    my @ends = (1216057352, 1218858291);
     my @macs = qw/001133556611 aaff33552211/;
 
     seek DATA, $datapos, 0;
 
-    ok($bufsize, "> reading with bufsize $bufsize");
+    diag("reading with bufsize $bufsize");
 
     while($ctrl--) {
         unless(defined read(DATA, $buffer, $bufsize)) {
