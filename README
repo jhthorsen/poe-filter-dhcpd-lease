@@ -2,7 +2,7 @@ NAME
     POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 VERSION
-    0.03
+    0.04
 
 METHODS
   new
