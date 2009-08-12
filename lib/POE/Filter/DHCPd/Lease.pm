@@ -105,9 +105,9 @@ sub get_one {
 
         for my $k (qw/starts ends/) {
             next unless($lease->{$k});
-            if(my @values = reverse $lease->{$k} =~ $DATE) {
-                $values[4]--;
-                $lease->{$k} = timelocal(@values);
+            if(my @values = $lease->{$k} =~ $DATE) {
+                $values[1]--; # decrease month
+                $lease->{$k} = timelocal(reverse @values);
             }
         }
 
