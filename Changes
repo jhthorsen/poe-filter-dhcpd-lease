@@ -1,6 +1,6 @@
 Revision history for Perl module POE::Component::TFTPd
 
-0.05
+0.05     Wed Apr 21 10:35:16 CEST 2010
    - Fix pod tests: Not required
    - Fix Makefile.PL: Correct dependencies
 
