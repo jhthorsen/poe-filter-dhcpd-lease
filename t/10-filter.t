@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use lib './lib';
 use POE::Filter::DHCPd::Lease;
+use Time::Local;
 use Test::More tests => 16;
 
 my $filter  = POE::Filter::DHCPd::Lease->new;
@@ -12,8 +13,11 @@ my $buffer;
 
 for my $bufsize (16, 2048) {
     my $ctrl = 100;
-    my @ends = (1216057352, 1218858291);
     my @macs = qw/001133556611 aaff33552211/;
+    my @ends;
+
+    push @ends, timelocal(reverse 2008,6,14, 19,42,32);
+    push @ends, timelocal(reverse 2008,7,16,  5,44,51);
 
     seek DATA, $datapos, 0;
 
