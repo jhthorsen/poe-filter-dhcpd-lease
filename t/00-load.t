@@ -1,6 +1,5 @@
-#!perl -T
-
-use Test::More tests => 1;
-
-BEGIN { use_ok( 'POE::Filter::DHCPd::Lease' ) }
-
+#!/usr/bin/perl
+use lib qw(lib);
+use Test::More;
+plan tests => 1;
+use_ok('POE::Filter::DHCPd::Lease');
