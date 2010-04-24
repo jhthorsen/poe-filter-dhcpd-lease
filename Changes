@@ -1,21 +1,25 @@
 Revision history for Perl module POE::Component::TFTPd
 
+0.05_01  Sat Apr 24 16:33:57 CEST 2010
+       - Fix 10-filter.t: failed in any other timezone than
+         CEST
+
 0.05     Wed Apr 21 10:52:56 CEST 2010
-   - Fix pod tests: Not required
-   - Fix Makefile.PL: Correct dependencies
+       - Fix pod tests: Not required
+       - Fix Makefile.PL: Correct dependencies
 
 0.04     Tue Juli 21 15:00:40 2009
-   - Fix failing test
-   - Fix parsing of starts/ends
+       - Fix failing test
+       - Fix parsing of starts/ends
 
 0.03     Mon Jun  1 17:30:00 2009
-   - Fix timelocal() expects month from 0-11
+       - Fix timelocal() expects month from 0-11
 
 0.02     Fri Apr  3 11:11:40 2009
-   - Fix greedy bug
-   - Change starts/ends are in epoch format
-   - Code seems to actually do something
+       - Fix greedy bug
+       - Change starts/ends are in epoch format
+       - Code seems to actually do something
 
 0.01     Thu Apr   2 00:15:30 2009
-   - Commited first version of POE::Filter::DHCPd::Lease
+       - Commited first version of POE::Filter::DHCPd::Lease
 
