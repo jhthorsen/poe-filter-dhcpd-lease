@@ -1,8 +1,10 @@
 Revision history for Perl module POE::Component::TFTPd
 
+0.0502   Sat Jun 19 13:58:10 CEST 2010
+       - Fix 10-filter.t: failed in any other timezone than CEST
+
 0.05_01  Sat Apr 24 16:33:57 CEST 2010
-       - Fix 10-filter.t: failed in any other timezone than
-         CEST
+       - This release is the same as 0.0502
 
 0.05     Wed Apr 21 10:52:56 CEST 2010
        - Fix pod tests: Not required
