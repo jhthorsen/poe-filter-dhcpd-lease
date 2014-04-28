@@ -23,12 +23,12 @@ our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
 our %PARSER  = (
-    starts      => qr/ starts  \s\d+\s (.+) /mx,
-    ends        => qr/ ends    \s\d+\s (.+) /mx,
-    binding     => qr/ binding \s state \s (.+) /mx,
-    hw_ethernet => qr/ hardware \s ethernet \s (.+) /mx,
-    remote_id   => qr/ option \s agent.remote-id  \s (.+) /mx,
-    circuit_id  => qr/ option \s agent.circuit-id \s (.+) /mx,
+    starts      => qr/ starts  \s\d+\s (.+?) /mx,
+    ends        => qr/ ends    \s\d+\s (.+?) /mx,
+    binding     => qr/ binding \s state \s (\S+) /mx,
+    hw_ethernet => qr/ hardware \s ethernet \s (\S+) /mx,
+    remote_id   => qr/ option \s agent.remote-id  \s (.+?) /mx,
+    circuit_id  => qr/ option \s agent.circuit-id \s (.+?) /mx,
     hostname    => qr/ client-hostname \s "([^"]+)" /mx,
 );
 
