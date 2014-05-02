@@ -1,5 +1,8 @@
 Revision history for Perl module POE::Filter::DHCPd::Lease
 
+0.06     Fri May  2 16:38:56 UTC 2014
+       - fix intermittent parse error with 5.17+
+
 0.0502   Sat Jun 19 13:58:10 CEST 2010
        - Fix 10-filter.t: failed in any other timezone than CEST
 
