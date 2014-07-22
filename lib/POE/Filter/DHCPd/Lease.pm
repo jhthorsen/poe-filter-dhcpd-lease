@@ -6,9 +6,11 @@ POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 =head1 VERSION
 
-0.06
+0.0701
 
 =cut
+
+our $VERSION = '0.0701';
 
 use strict;
 use warnings;
@@ -17,7 +19,6 @@ use Time::Local;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
 
-our $VERSION = '0.07';
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
@@ -121,8 +122,8 @@ sub _done {
         $lease->{'hw_ethernet'} = $mac;
     }
     # compatibility with old parser output
-    $lease->{'circuit_id'} = delete $lease->{'circuit-id'};
-    $lease->{'remote_id'} = delete $lease->{'remote-id'};
+    $lease->{'circuit_id'} = delete $lease->{'circuit-id'} if ($lease->{'circuit-id'});
+    $lease->{'remote_id'} = delete $lease->{'remote-id'} if ($lease->{'remote-id'});
 
     return [ $lease ];
 
