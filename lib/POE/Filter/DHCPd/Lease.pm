@@ -21,13 +21,13 @@ our $VERSION = '0.07';
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
-our $PARSER  = qr / ( (starts) \s\d+\s (.+?)
-                    | (ends)    \s\d+\s (.+?)
-                    | (binding) \s state \s (\S+)
-                    | hardware \s (ethernet) \s (\S+)
-                    | option \s agent.(remote-id) \s (.+?)
-                    | option \s agent.(circuit-id) \s (.+?)
-                    | client-(hostname) \s "([^"]+)"
+our $PARSER  = qr / (?: (?<name>starts) \s\d+\s (?<value>.+?)
+                    | (?<name>ends)    \s\d+\s (?<value>.+?)
+                    | (?<name>binding) \s state \s (?<value>\S+)
+                    | hardware \s (?<name>ethernet) \s (?<value>\S+)
+                    | option \s agent.(?<name>remote-id) \s (?<value>.+?)
+                    | option \s agent.(?<name>circuit-id) \s (?<value>.+?)
+                    | client-(?<name>hostname) \s "(?<value>[^"]+)"
                     ) /mx;
 
 =head1 METHODS
@@ -92,8 +92,8 @@ sub get_one {
         if(!$self->[LEASE] and $string =~ /$START/) {
             $self->[LEASE] = { ip => $1 };
         } elsif ($self->[LEASE]) {
-            if ($string =~ /$PARSER/) {
-                $self->[LEASE]{$1} = $2;
+            if ($string =~ /$PARSER;/) {
+                $self->[LEASE]{$+{name}} =  $+{value};
             } elsif($string =~ /.*?$END/) {
                 return $self->_done();
             }
@@ -125,7 +125,6 @@ sub _done {
     $lease->{'remote_id'} = delete $lease->{'remote-id'};
 
     return [ $lease ];
-
 
 }
 
