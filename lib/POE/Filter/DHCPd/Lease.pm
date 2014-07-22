@@ -16,21 +16,19 @@ use base qw/POE::Filter/;
 use Time::Local;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
-use constant DONE   => "\a";
 
 our $VERSION = '0.06';
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
-our %PARSER  = (
-    starts      => qr/ starts  \s\d+\s (.+?) /mx,
-    ends        => qr/ ends    \s\d+\s (.+?) /mx,
-    binding     => qr/ binding \s state \s (\S+) /mx,
-    hw_ethernet => qr/ hardware \s ethernet \s (\S+) /mx,
-    remote_id   => qr/ option \s agent.remote-id  \s (.+?) /mx,
-    circuit_id  => qr/ option \s agent.circuit-id \s (.+?) /mx,
-    hostname    => qr/ client-hostname \s "([^"]+)" /mx,
-);
+our $PARSER  = qr / ( (starts) \s\d+\s (.+?)
+                    | (ends)    \s\d+\s (.+?)
+                    | (binding) \s state \s (\S+)
+                    | hardware \s (ethernet) \s (\S+)
+                    | option \s agent.(remote-id) \s (.+?)
+                    | option \s agent.(circuit-id) \s (.+?)
+                    | client-(hostname) \s "([^"]+)"
+                    ) /mx;
 
 =head1 METHODS
 
@@ -58,8 +56,7 @@ sub get_one_start {
     my $self = shift;
     my $data = shift; # array-ref of data
 
-    $self->[BUFFER] .= join "", @$data;
-
+    $self->[BUFFER] .= join '', @$data;
     return;
 }
 
@@ -81,44 +78,55 @@ C<$leases> is an array-ref, containing zero or one leases.
 
 sub get_one {
     my $self = shift;
+    # look for as many lines as we can find in the current buffer
+    while(1) {
+        my $string;
+        # look for lines with \r\n endings
+        if($self->[BUFFER] =~ /^(.*?\x0d?\x0a)/s) {
+            my $length = length $1;
+            $string = substr($self->[BUFFER],0,$length,'');
+        }
 
-    if(!$self->[LEASE]) {
-        if($self->[BUFFER] =~ s/$START//) {
+        return [] unless $string;
+
+        if(!$self->[LEASE] and $string =~ /$START/) {
             $self->[LEASE] = { ip => $1 };
-        }
-    }
-
-    if($self->[LEASE]) {
-        for my $k (keys %PARSER) {
-            if($self->[BUFFER] =~ s/\s*$PARSER{$k};[\n\r]*//) {
-                $self->[LEASE]{$k} = $1;
-            }
-        }
-        if($self->[BUFFER] =~ s/.*?$END//s) {
-            $self->[LEASE]{DONE()} = 1;
-        }
-    }
-
-    if($self->[LEASE] and $self->[LEASE]{DONE()}) {
-        delete $self->[LEASE]{DONE()};
-        my $lease = delete $self->[LEASE];
-
-        for my $k (qw/starts ends/) {
-            next unless($lease->{$k});
-            if(my @values = $lease->{$k} =~ $DATE) {
-                $values[1]--; # decrease month
-                $lease->{$k} = timelocal(reverse @values);
+        } elsif ($self->[LEASE]) {
+            if ($string =~ /$PARSER/) {
+                $self->[LEASE]{$1} = $2;
+            } elsif($string =~ /.*?$END/) {
+                return $self->_done();
             }
         }
 
-        if(my $mac =  _mac($lease->{'hw_ethernet'})) {
-            $lease->{'hw_ethernet'} = $mac;
-        }
-
-        return [ $lease ];
     }
 
     return [];
+}
+
+sub _done {
+    my $self = shift;
+
+    my $lease = delete $self->[LEASE];
+
+    for my $k (qw/starts ends/) {
+        next unless($lease->{$k});
+        if(my @values = $lease->{$k} =~ $DATE) {
+            $values[1]--; # decrease month
+            $lease->{$k} = timelocal(reverse @values);
+        }
+    }
+
+    if(my $mac =  _mac(delete $lease->{'ethernet'})) {
+        $lease->{'hw_ethernet'} = $mac;
+    }
+    # compatibility with old parser output
+    $lease->{'circuit_id'} = delete $lease->{'circuit-id'};
+    $lease->{'remote_id'} = delete $lease->{'remote-id'};
+
+    return [ $lease ];
+
+
 }
 
 sub _mac {
