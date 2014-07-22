@@ -8,7 +8,7 @@ requires q(Time::Local) => 1.1;
 
 test_requires q(Test::More) => 0.9;
 
-bugtracker q(http://rt.cpan.org/NoAuth/Bugs.html?Dist=POE-Filter-DHCPd-Lease);
+bugtracker q(https://github.com/jhthorsen/poe-filter-dhcpd-lease/issues);
 homepage q(http://search.cpan.org/dist/POE-Filter-DHCPd-Lease);
 repository q(git://github.com/jhthorsen/poe-filter-dhcpd-lease.git);
 

@@ -17,7 +17,7 @@ use Time::Local;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
