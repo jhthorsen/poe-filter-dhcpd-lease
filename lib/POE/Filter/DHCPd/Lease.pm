@@ -6,11 +6,11 @@ POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 =head1 VERSION
 
-0.0701
+0.0702
 
 =cut
 
-our $VERSION = '0.0701';
+our $VERSION = '0.0702';
 
 use strict;
 use warnings;
@@ -18,6 +18,7 @@ use base qw/POE::Filter/;
 use Time::Local;
 use constant BUFFER => 0;
 use constant LEASE  => 1;
+use v5.10;
 
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
