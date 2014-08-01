@@ -5,7 +5,7 @@ use warnings;
 use lib './lib';
 use POE::Filter::DHCPd::Lease;
 use Time::Local;
-use Test::More tests => 32;
+use Test::More tests => 40;
 
 my $filter  = POE::Filter::DHCPd::Lease->new;
 my $datapos = 1 + tell DATA;
@@ -14,6 +14,7 @@ my $buffer;
 for my $bufsize (1, 3, 16, 2048) {
     my $ctrl = 1000;
     my @macs = qw/001133556611 aaff33552211/;
+    my @binding_states = qw/active free/;
     my @ends;
 
     push @ends, timelocal(reverse 2008,6,14, 19,42,32);
@@ -41,9 +42,11 @@ for my $bufsize (1, 3, 16, 2048) {
             for my $lease (@$leases) {
                 my $ends = shift @ends;
                 my $mac  = shift @macs;
+                my $binding  = shift @binding_states;
                 ok($lease->{'ip'}, "got lease for $lease->{'ip'}");
                 is($lease->{'hw_ethernet'}, $mac, "got lease for $mac");
                 is($lease->{'ends'}, $ends, "ends $ends");
+                is($lease->{'binding'}, $binding, "ends $binding");
             }
         }
     }
@@ -77,6 +80,7 @@ lease 10.19.83.199 {
   ends 1 2008/07/14 19:42:32;
   tstp 1 2008/07/14 19:42:32;
   binding state active;
+  next binding state free;
 #  binding state free;
   hardware ethernet 00:11:33:55:66:11;
 }
