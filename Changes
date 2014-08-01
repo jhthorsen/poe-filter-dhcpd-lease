@@ -1,5 +1,8 @@
 Revision history for Perl module POE::Filter::DHCPd::Lease
 
+0.0703   Fri Aug  1 22:19:43 UTC 2014
+       - Added support for "next binding state"
+
 0.0702   Mon Jul 28 20:01:06 UTC 2014
        - Minimum perl version bump to 5.10 to support regex named capture
          variables.

@@ -6,11 +6,11 @@ POE::Filter::DHCPd::Lease - parses leases from isc dhcpd leases file
 
 =head1 VERSION
 
-0.0702
+0.0703
 
 =cut
 
-our $VERSION = '0.0702';
+our $VERSION = '0.0703';
 
 use strict;
 use warnings;
