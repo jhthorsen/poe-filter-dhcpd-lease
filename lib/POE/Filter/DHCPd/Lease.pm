@@ -23,14 +23,14 @@ use v5.10;
 our $DATE    = qr# (\d{4})/(\d\d)/(\d\d) \s (\d\d):(\d\d):(\d\d) #mx;
 our $START   = qr#^ lease \s ([\d\.]+) \s \{ #mx;
 our $END     = qr# } [\n\r]+ #mx;
-our $PARSER  = qr / (?: (?<name>starts) \s\d+\s (?<value>.+?)
-                    | (?<name>ends)    \s\d+\s (?<value>.+?)
-                    | ^\s*(?<name>binding) \s state \s (?<value>\S+)
-                    | ^\s*(?<name>next) \s binding \s state \s (?<value>\S+)
-                    | hardware \s (?<name>ethernet) \s (?<value>\S+)
-                    | option \s agent.(?<name>remote-id) \s (?<value>.+?)
-                    | option \s agent.(?<name>circuit-id) \s (?<value>.+?)
-                    | client-(?<name>hostname) \s "(?<value>[^"]+)"
+our $PARSER  = qr / (?| (starts) \s\d+\s (.+?)
+                    | (ends)    \s\d+\s (.+?)
+                    | ^\s*(binding) \s state \s (\S+)
+                    | ^\s*(next) \s binding \s state \s (\S+)
+                    | hardware \s (ethernet) \s (\S+)
+                    | option \s agent.(remote-id) \s (.+?)
+                    | option \s agent.(circuit-id) \s (.+?)
+                    | client-(hostname) \s "([^"]+)"
                     ) /mx;
 
 =head1 METHODS
@@ -96,7 +96,7 @@ sub get_one {
             $self->[LEASE] = { ip => $1 };
         } elsif ($self->[LEASE]) {
             if ($string =~ /$PARSER;/) {
-                $self->[LEASE]{$+{name}} =  $+{value};
+                $self->[LEASE]{$1} =  $2;
             } elsif($string =~ /.*?$END/) {
                 return $self->_done();
             }
@@ -104,7 +104,7 @@ sub get_one {
 
     }
 
-    return [];
+    return []
 }
 
 sub _done {
